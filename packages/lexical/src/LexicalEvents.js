@@ -147,7 +147,7 @@ function onSelectionChange(
         selection.dirty = true;
       }
       const anchor = selection.anchor;
-      if (anchor.type === 'text') {
+      if (anchor.type === 'text' && !isIgnoreSelectionFormat(editor)) {
         const anchorNode = anchor.getNode();
         selection.format = anchorNode.getFormat();
       } else if (anchor.type === 'element') {
@@ -156,6 +156,15 @@ function onSelectionChange(
     }
     dispatchCommand(editor, SELECTION_CHANGE_COMMAND);
   });
+}
+
+function isIgnoreSelectionFormat(editor: LexicalEditor): boolean {
+  const latestFormatChange = editor._latestFormatChange;
+  const skipFormatChangeThreshold = 50;
+  return (
+    latestFormatChange > 0 &&
+    Date.now() - latestFormatChange < skipFormatChangeThreshold
+  );
 }
 
 // This is a work-around is mainly Chrome specific bug where if you select
